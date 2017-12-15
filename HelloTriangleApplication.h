@@ -41,6 +41,8 @@ private:
     SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
     VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& available);
     VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
+    void createSwapchain();
+    void createImageViews();
 
     GLFWwindow* _window;
 
@@ -50,6 +52,12 @@ private:
     VkQueue _graphicsQueue;
     VkSurfaceKHR _surface;
     VkQueue _presentQueue;
+
+    VkSwapchainKHR _swapchain;
+    std::vector<VkImage> _swapchainImages;
+    VkFormat _swapchainImageFormat;
+    VkExtent2D _swapchainExtent;
+    std::vector<VkImageView> _swapchainImageViews;
 
     static int _width;
     static int _height;
