@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <fstream>
 #include <limits>
 #include <set>
 #include <stdexcept>
@@ -14,6 +15,25 @@ using std::min;
 using std::set;
 using std::string;
 using std::vector;
+
+namespace {
+    std::vector<char> readFile(const std::string& filename) {
+        std::ifstream file(filename, std::ios::ate | std::ios::binary);
+    
+        if (!file.is_open()) {
+            throw std::runtime_error("failed to open file!");
+        }
+
+        auto fileSize = (size_t) file.tellg();
+        vector<char> buffer(fileSize);
+
+        file.seekg(0);
+        file.read(buffer.data(), fileSize);
+        file.close();
+
+        return buffer;
+    }
+}
 
 int HelloTriangleApplication::_width  = 800;
 int HelloTriangleApplication::_height = 600;
@@ -41,6 +61,7 @@ void HelloTriangleApplication::initVulkan() {
     createLogicalDevice();
     createSwapchain();
     createImageViews();
+    createGraphicsPipeline();
 }
 
 void HelloTriangleApplication::mainLoop() {
@@ -361,4 +382,42 @@ void HelloTriangleApplication::createImageViews() {
             throw std::runtime_error("failed to create image views!");
         }
     }
+}
+
+void HelloTriangleApplication::createGraphicsPipeline() {
+    auto vertShaderCode = readFile("shaders/vert.spv");
+    auto fragShaderCode = readFile("shaders/frag.spv");
+
+    _vertShaderModule = createShaderModule(vertShaderCode);
+    _fragShaderModule = createShaderModule(fragShaderCode);
+
+    VkPipelineShaderStageCreateInfo vertShaderStageInfo = {};
+    vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
+    vertShaderStageInfo.module = _vertShaderModule;
+    vertShaderStageInfo.pName = "main";
+    
+    VkPipelineShaderStageCreateInfo fragShaderStageInfo = {};
+    fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+    fragShaderStageInfo.module = _fragShaderModule;
+    fragShaderStageInfo.pName = "main";
+    
+    VkPipelineShaderStageCreateInfo shaderStages[] = {vertShaderStageInfo, fragShaderStageInfo};
+
+    vkDestroyShaderModule(_device, _fragShaderModule, nullptr);
+    vkDestroyShaderModule(_device, _vertShaderModule, nullptr);
+}
+
+VkShaderModule HelloTriangleApplication::createShaderModule(const std::vector<char>& code) {
+    VkShaderModuleCreateInfo createInfo = {};
+    createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+    createInfo.codeSize = code.size();
+    createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
+    VkShaderModule shaderModule;
+    if (vkCreateShaderModule(_device, &createInfo, nullptr, &shaderModule) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create shader module!");
+    }
+
+    return shaderModule;
 }

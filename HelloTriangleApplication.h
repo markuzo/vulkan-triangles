@@ -43,6 +43,8 @@ private:
     VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
     void createSwapchain();
     void createImageViews();
+    void createGraphicsPipeline();
+    VkShaderModule createShaderModule(const std::vector<char>& code);
 
     GLFWwindow* _window;
 
@@ -58,6 +60,9 @@ private:
     VkFormat _swapchainImageFormat;
     VkExtent2D _swapchainExtent;
     std::vector<VkImageView> _swapchainImageViews;
+
+    VkShaderModule _vertShaderModule;
+    VkShaderModule _fragShaderModule;
 
     static int _width;
     static int _height;

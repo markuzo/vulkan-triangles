@@ -8,3 +8,4 @@ Requires the following packages:
 * vulkan-devel
 * vulkan driver for hardware (testing on intel)
 * glfw
+* glslang (for SPIR-V compiler)
