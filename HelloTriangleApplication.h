@@ -45,6 +45,7 @@ private:
     void createImageViews();
     void createGraphicsPipeline();
     VkShaderModule createShaderModule(const std::vector<char>& code);
+    void createRenderPass();
 
     GLFWwindow* _window;
 
@@ -63,6 +64,9 @@ private:
 
     VkShaderModule _vertShaderModule;
     VkShaderModule _fragShaderModule;
+
+    VkRenderPass _renderPass;
+    VkPipelineLayout _pipelineLayout;
 
     static int _width;
     static int _height;
