@@ -66,6 +66,7 @@ void HelloTriangleApplication::initVulkan() {
     createFramebuffers();
     createCommandPool();
     createCommandBuffers();
+    createSemaphores();
 }
 
 void HelloTriangleApplication::mainLoop() {
