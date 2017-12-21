@@ -46,6 +46,9 @@ private:
     void createGraphicsPipeline();
     VkShaderModule createShaderModule(const std::vector<char>& code);
     void createRenderPass();
+    void createFramebuffers();
+    void createCommandPool();
+    void createCommandBuffers();
 
     GLFWwindow* _window;
 
@@ -67,6 +70,11 @@ private:
 
     VkRenderPass _renderPass;
     VkPipelineLayout _pipelineLayout;
+    VkPipeline _graphicsPipeline;
+
+    std::vector<VkFramebuffer> _swapchainFramebuffers;
+    VkCommandPool _commandPool;
+    std::vector<VkCommandBuffer> _commandBuffers;
 
     static int _width;
     static int _height;
