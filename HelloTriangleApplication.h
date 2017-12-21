@@ -49,6 +49,8 @@ private:
     void createFramebuffers();
     void createCommandPool();
     void createCommandBuffers();
+    void createSemaphores();
+    void drawFrame();
 
     GLFWwindow* _window;
 
@@ -75,6 +77,9 @@ private:
     std::vector<VkFramebuffer> _swapchainFramebuffers;
     VkCommandPool _commandPool;
     std::vector<VkCommandBuffer> _commandBuffers;
+
+    VkSemaphore _imageAvailableSemaphore;
+    VkSemaphore _renderFinishedSemaphore;
 
     static int _width;
     static int _height;

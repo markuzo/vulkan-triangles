@@ -71,10 +71,15 @@ void HelloTriangleApplication::initVulkan() {
 void HelloTriangleApplication::mainLoop() {
     while (!glfwWindowShouldClose(_window)) {
         glfwPollEvents();
+        drawFrame();
     }
+
+    vkDeviceWaitIdle(_device);
 }
 
 void HelloTriangleApplication::cleanup() {
+    vkDestroySemaphore(_device, _renderFinishedSemaphore, nullptr);
+    vkDestroySemaphore(_device, _imageAvailableSemaphore, nullptr);
     vkDestroyCommandPool(_device, _commandPool, nullptr);
     for (auto framebuffer : _swapchainFramebuffers) {
         vkDestroyFramebuffer(_device, framebuffer, nullptr);
@@ -571,16 +576,27 @@ void HelloTriangleApplication::createRenderPass() {
     subpass.colorAttachmentCount = 1;
     subpass.pColorAttachments = &colorAttachmentRef;
 
+    VkSubpassDependency dependency = {};
+    dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+    dependency.dstSubpass = 0;
+    dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    dependency.srcAccessMask = 0;
+    dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
     VkRenderPassCreateInfo renderPassInfo = {};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
     renderPassInfo.attachmentCount = 1;
     renderPassInfo.pAttachments = &colorAttachment;
     renderPassInfo.subpassCount = 1;
     renderPassInfo.pSubpasses = &subpass;
+    renderPassInfo.dependencyCount = 1;
+    renderPassInfo.pDependencies = &dependency;
 
     if (vkCreateRenderPass(_device, &renderPassInfo, nullptr, &_renderPass) != VK_SUCCESS) {
         throw std::runtime_error("failed to create render pass!");
     }
+
 }
 
 void HelloTriangleApplication::createFramebuffers() {
@@ -649,7 +665,65 @@ void HelloTriangleApplication::createCommandBuffers() {
         VkClearValue clearColor = {0.0f, 0.0f, 0.0f, 1.0f};
         renderPassInfo.clearValueCount = 1;
         renderPassInfo.pClearValues = &clearColor;
+
         vkCmdBeginRenderPass(_commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+        vkCmdBindPipeline(_commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, _graphicsPipeline);
+        vkCmdDraw(_commandBuffers[i], 3, 1, 0, 0);
+        vkCmdEndRenderPass(_commandBuffers[i]);
+
+        if (vkEndCommandBuffer(_commandBuffers[i]) != VK_SUCCESS) {
+            throw std::runtime_error("failed to record command buffer!");
+        }
     }
 
+}
+
+void HelloTriangleApplication::createSemaphores() {
+    VkSemaphoreCreateInfo semaphoreInfo = {};
+    semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;   
+
+    if (vkCreateSemaphore(_device, &semaphoreInfo, nullptr, &_imageAvailableSemaphore) != VK_SUCCESS ||
+            vkCreateSemaphore(_device, &semaphoreInfo, nullptr, &_renderFinishedSemaphore) != VK_SUCCESS) {
+
+        throw std::runtime_error("failed to create semaphores!");
+    }
+}
+
+
+void HelloTriangleApplication::drawFrame() {
+    vkQueueWaitIdle(_presentQueue);
+
+    uint32_t imageIndex;
+    vkAcquireNextImageKHR(_device, _swapchain, std::numeric_limits<uint64_t>::max(), _imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
+
+    VkSemaphore waitSemaphores[] = {_imageAvailableSemaphore};
+    VkSemaphore signalSemaphores[] = {_renderFinishedSemaphore};
+    VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+
+    VkSubmitInfo submitInfo = {};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submitInfo.waitSemaphoreCount = 1;
+    submitInfo.pWaitSemaphores = waitSemaphores;
+    submitInfo.pWaitDstStageMask = waitStages;
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &_commandBuffers[imageIndex];
+    submitInfo.signalSemaphoreCount = 1;
+    submitInfo.pSignalSemaphores = signalSemaphores;
+
+    if (vkQueueSubmit(_graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE) != VK_SUCCESS) {
+        throw std::runtime_error("failed to submit draw command buffer!");
+    }
+
+    VkSwapchainKHR swapChains[] = {_swapchain};
+
+    VkPresentInfoKHR presentInfo = {};
+    presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+    presentInfo.waitSemaphoreCount = 1;
+    presentInfo.pWaitSemaphores = signalSemaphores;
+    presentInfo.swapchainCount = 1;
+    presentInfo.pSwapchains = swapChains;
+    presentInfo.pImageIndices = &imageIndex;
+    presentInfo.pResults = nullptr;
+
+    vkQueuePresentKHR(_presentQueue, &presentInfo);
 }
