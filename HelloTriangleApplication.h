@@ -31,6 +31,9 @@ private:
     void mainLoop();
     void cleanup();
     void createInstance();
+    bool checkValidationLayerSupport();
+    std::vector<const char*> getRequiredExtensions();
+    void setupDebugMessenger();
     void pickPhysicalDevice();
     void createLogicalDevice();
     void createSurface();
@@ -81,11 +84,38 @@ private:
     VkSemaphore _imageAvailableSemaphore;
     VkSemaphore _renderFinishedSemaphore;
 
+    VkDebugUtilsMessengerEXT _debugMessenger;
+
     static int _width;
     static int _height;
+    static bool _enableValidationLayers;
 
     const std::vector<const char*> _deviceExtensions = {
         VK_KHR_SWAPCHAIN_EXTENSION_NAME 
     };
+
+    const std::vector<const char*> _validationLayers = {
+        "VK_LAYER_KHRONOS_validation"
+    };
+
+    // validation layer callback functions
+    static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
+        VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+        VkDebugUtilsMessageTypeFlagsEXT messageType,
+        const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+        void* pUserData);
+
+    VkResult CreateDebugUtilsMessengerEXT(
+        VkInstance instance, 
+        const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, 
+        const VkAllocationCallbacks* pAllocator, 
+        VkDebugUtilsMessengerEXT* pDebugMessenger);
+
+    void DestroyDebugUtilsMessengerEXT(
+        VkInstance instance,
+        VkDebugUtilsMessengerEXT debugMessenger,
+        const VkAllocationCallbacks* pAllocator);
+
+    void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
 };
 

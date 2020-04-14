@@ -1,2 +1,7 @@
 main
 **/*.spv
+
+.vs/
+thirdparty/
+VulkanTriangles.vcxproj.user
+x64/
