@@ -45,17 +45,17 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-	<PreBuildEventUseInBuild>true</PreBuildEventUseInBuild>
+    <PreBuildEventUseInBuild>true</PreBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <PreBuildEvent>
-	  <Command>C:\VulkanSDK\1.2.135.0\Bin\glslc.exe shaders/shader.frag -o shaders/frag.spv</Command>
+      <Command>C:\VulkanSDK\1.2.135.0\Bin\glslc.exe shaders/shader.frag -o shaders/frag.spv</Command>
       <Message>Compiling fragment shader.</Message>
     </PreBuildEvent>
-	<PreBuildEvent>
+    <PreBuildEvent>
       <Command>C:\VulkanSDK\1.2.135.0\Bin\glslc.exe shaders/shader.vert -o shaders/vert.spv</Command>
       <Message>Compiling vertex shader.</Message>
     </PreBuildEvent>
@@ -68,7 +68,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.2.135.0\Include;C:\work\code\vulkan-triangles\thirdparty\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\work\code\vulkan-triangles\thirdparty\glm;C:\VulkanSDK\1.2.135.0\Include;C:\work\code\vulkan-triangles\thirdparty\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
