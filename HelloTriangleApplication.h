@@ -52,8 +52,10 @@ private:
     void createFramebuffers();
     void createCommandPool();
     void createCommandBuffers();
-    void createSemaphores();
+    void createSyncObjects();
     void drawFrame();
+    void recreateSwapchain();
+    void cleanupSwapchain();
 
     GLFWwindow* _window;
 
@@ -81,14 +83,19 @@ private:
     VkCommandPool _commandPool;
     std::vector<VkCommandBuffer> _commandBuffers;
 
-    VkSemaphore _imageAvailableSemaphore;
-    VkSemaphore _renderFinishedSemaphore;
+    std::vector<VkSemaphore> _imageAvailableSemaphores;
+    std::vector<VkSemaphore> _renderFinishedSemaphores;
+    std::vector<VkFence> _inFlightFences;
+    std::vector<VkFence> _imagesInFlight;
+    int _currentFrame;
+    bool _framebufferResized;
 
     VkDebugUtilsMessengerEXT _debugMessenger;
 
     static int _width;
     static int _height;
     static bool _enableValidationLayers;
+    static int _maxFramesInFlight;
 
     const std::vector<const char*> _deviceExtensions = {
         VK_KHR_SWAPCHAIN_EXTENSION_NAME 
@@ -104,6 +111,8 @@ private:
         VkDebugUtilsMessageTypeFlagsEXT messageType,
         const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
         void* pUserData);
+
+    static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
 
     VkResult CreateDebugUtilsMessengerEXT(
         VkInstance instance, 
