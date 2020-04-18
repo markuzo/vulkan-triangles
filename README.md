@@ -20,7 +20,9 @@ Tested on Windows 2019.
 
 Requires:
 
-- glfw in ./thirdparty/
+- glfw in ./thirdparty/ (e.g. thirdparty/glfw/lib-vc2019)
+- glm in ./thirdparty/ (e.g. ./thirdparty/glm/glm/glm.hpp)
+- stb in ./thirdparty/ (e.g. ./thirdparty/stb/stb/stb_image.h)
 - Vulkan (LunarG).
 - Vulkan drivers
-- Change vcxproj to point correctly to VulkanSDK and glfw.
+- Change vcxproj to point correctly to VulkanSDK and thirdparty stuff.
