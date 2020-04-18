@@ -1,5 +1,9 @@
-all: shaders
-	g++ main.cpp HelloTriangleApplication.cpp -lglfw -lvulkan -o main
+STB_INCLUDE_PATH = ./thirdparty/stb
+TINYOBJ_INCLUDE_PATH = ./thirdparty/tinyobjloader
+CFLAGS = -I$(STB_INCLUDE_PATH) -I$(TINYOBJ_INCLUDE_PATH)
+
+main: shaders
+	g++ main.cpp HelloTriangleApplication.cpp $(CFLAGS) -lglfw -lvulkan -o main 
 
 shaders: shaders/vert.spv shaders/frag.spv
 
@@ -8,3 +12,6 @@ shaders/vert.spv: shaders/shader.vert
 
 shaders/frag.spv: shaders/shader.frag
 	glslangValidator -V shaders/shader.frag -o shaders/frag.spv
+
+run: main 
+	./main	
