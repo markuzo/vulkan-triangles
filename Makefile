@@ -3,7 +3,7 @@ TINYOBJ_INCLUDE_PATH = ./thirdparty/tinyobjloader
 CFLAGS = -I$(STB_INCLUDE_PATH) -I$(TINYOBJ_INCLUDE_PATH)
 
 main: shaders
-	g++ main.cpp HelloTriangleApplication.cpp $(CFLAGS) -lglfw -lvulkan -o main 
+	g++ main.cpp App.cpp $(CFLAGS) -lglfw -lvulkan -o main 
 
 shaders: shaders/vert.spv shaders/frag.spv
 

@@ -2,11 +2,11 @@
 #include <stdexcept>
 #include <functional>
 
-#include "HelloTriangleApplication.h"
+#include "App.h"
 
 
 int main() {
-    HelloTriangleApplication app;
+    App app;
 
     try {
         app.run(); 

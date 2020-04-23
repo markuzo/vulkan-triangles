@@ -86,7 +86,7 @@ struct UniformBufferObject {
     alignas(16) glm::mat4 proj;
 };
 
-class HelloTriangleApplication {
+class App {
 public: 
     void run();
 
@@ -253,4 +253,5 @@ private:
 
     void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
 };
+
 
