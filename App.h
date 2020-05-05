@@ -1,7 +1,5 @@
 #pragma once 
 
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
 #include <vulkan/vulkan.h>
 
 #define GLM_FORCE_RADIANS
@@ -11,25 +9,13 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/hash.hpp>
 
+#include "AppDevice.h"
+#include "ImageWriter.h"
+
 #include <chrono>
 #include <vector>
 #include <array>
 #include <unordered_map>
-
-struct QueueFamilyIndices {
-    int graphicsFamily = -1;
-    int presentFamily = -1;
-
-    bool isComplete() {
-        return graphicsFamily >= 0 && presentFamily >= 0;
-    }
-};
-
-struct SwapChainSupportDetails {
-    VkSurfaceCapabilitiesKHR capabilities;
-    std::vector<VkSurfaceFormatKHR> formats;
-    std::vector<VkPresentModeKHR> presentModes;
-};
 
 struct Vertex {
     glm::vec3 pos;
@@ -91,22 +77,10 @@ public:
     void run();
 
 private:
-    void initWindow();
     void initVulkan();
     void mainLoop();
     void cleanup();
-    void createInstance();
-    bool checkValidationLayerSupport();
-    std::vector<const char*> getRequiredExtensions();
-    void setupDebugMessenger();
-    void pickPhysicalDevice();
-    void createLogicalDevice();
-    void createSurface();
-    QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
-    bool checkDeviceExtensionSupport(VkPhysicalDevice device);
-    bool isDeviceSuitable(VkPhysicalDevice device);
     VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& available);
-    SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
     VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& available);
     VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
     void createSwapchain();
@@ -139,25 +113,27 @@ private:
     void createCommandBuffers();
     void createSyncObjects();
     void drawFrame();
+    void saveFrame(uint32_t currentImage);
     void updateUniformBuffer(uint32_t currentImage);
     VkCommandBuffer beginSingleTimeCommands();
     void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels);
+    void transitionImageLayout(VkImage image, VkFormat format, VkAccessFlags sourceAccessFlags, VkAccessFlags destinationAccessFlags, VkImageLayout oldLayout, VkImageLayout newLayout, VkPipelineStageFlags sourceStage, VkPipelineStageFlags destinationStage, VkImageAspectFlags aspectFlags, uint32_t mipLevels); 
+    void transitionImageLayout(VkCommandBuffer commandBuffer, VkImage image, VkFormat format, VkAccessFlags sourceAccessFlags, VkAccessFlags destinationAccessFlags, VkImageLayout oldLayout, VkImageLayout newLayout, VkPipelineStageFlags sourceStage, VkPipelineStageFlags destinationStage, VkImageAspectFlags aspectFlags, uint32_t mipLevels); 
     void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
     void endSingleTimeCommands(VkCommandBuffer commandBuffer);
     void recreateSwapchain();
     void cleanupSwapchain();
 
-    VkSampleCountFlagBits getMaxUsableSampleCount();
-
     uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
-    GLFWwindow* _window;
+    AppInstance _appInstance;
+    AppWindow _appWindow;
+    AppDevice _appDevice;
+    ImageWriter _imageWriter;
 
-    VkInstance _instance;
     VkPhysicalDevice _physicalDevice;
     VkDevice _device;
     VkQueue _graphicsQueue;
-    VkSurfaceKHR _surface;
     VkQueue _presentQueue;
 
     VkSwapchainKHR _swapchain;
@@ -194,6 +170,9 @@ private:
     VkImage _depthImage;
     VkImageView _depthImageView;
     VkDeviceMemory _depthImageMemory;
+
+    VkImage _offscreenImage;
+    VkDeviceMemory _offscreenImageMemory;
    
     uint32_t _mipLevels;
     VkImage _textureImage;
@@ -209,49 +188,11 @@ private:
     std::vector<VkFence> _inFlightFences;
     std::vector<VkFence> _imagesInFlight;
     int _currentFrame;
-    bool _framebufferResized;
+    int _currentImage = 1;
 
-    VkSampleCountFlagBits _msaaSamples = VK_SAMPLE_COUNT_1_BIT;
-
-    VkDebugUtilsMessengerEXT _debugMessenger;
-
-    static const int _width;
-    static const int _height;
-    static const bool _enableValidationLayers;
     static const int _maxFramesInFlight;
     static const std::string _modelPath;
     static const std::string _texturePath;
-
-
-    const std::vector<const char*> _deviceExtensions = {
-        VK_KHR_SWAPCHAIN_EXTENSION_NAME 
-    };
-
-    const std::vector<const char*> _validationLayers = {
-        "VK_LAYER_KHRONOS_validation"
-    };
-
-    // validation layer callback functions
-    static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
-        VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-        VkDebugUtilsMessageTypeFlagsEXT messageType,
-        const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
-        void* pUserData);
-
-    static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
-
-    VkResult CreateDebugUtilsMessengerEXT(
-        VkInstance instance, 
-        const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, 
-        const VkAllocationCallbacks* pAllocator, 
-        VkDebugUtilsMessengerEXT* pDebugMessenger);
-
-    void DestroyDebugUtilsMessengerEXT(
-        VkInstance instance,
-        VkDebugUtilsMessengerEXT debugMessenger,
-        const VkAllocationCallbacks* pAllocator);
-
-    void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
 };
 
 
